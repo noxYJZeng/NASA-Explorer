@@ -1,22 +1,22 @@
 <template>
-  <div :class="{ dark: isDark }">
-    <div
-      class="min-h-screen bg-gray-50 dark:bg-gray-900 text-black dark:text-white
-             transition-colors duration-300 py-12 px-4 flex flex-col items-center"
-    >
-      <!-- ⭐ 顶部导航栏 -->
+  <div :class="{ dark: isDark }" class="bg-gray-50 dark:bg-gray-900">
+、    
+    <div class="min-h-screen text-black dark:text-white transition-colors duration-300 py-12 px-4 flex flex-col items-center">
       <Navbar :isDark="isDark" @toggle-dark="toggleDarkMode" />
-
-      <!-- ⭐ 页面内容动态切换 -->
       <RouterView />
     </div>
+
+    <Footer />
   </div>
 </template>
+
+
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
+import Footer from '@/components/Footer.vue'
 
 const isDark = ref(false)
 

@@ -86,7 +86,7 @@
       </div>
   
       <!-- NASA 实时轨道图像 -->
-      <h3 class="text-xl font-semibold my-6">Live NASA Orbit Viewer</h3>
+      <h3 class="text-xl font-semibold my-6">Live NASA Orbit</h3>
       <div class="w-full max-w-5xl mx-auto rounded overflow-hidden border h-[500px]">
         <iframe
           src="https://eyes.nasa.gov/apps/asteroids/"
