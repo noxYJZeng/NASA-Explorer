@@ -8,12 +8,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tsparticles/vue3": "^3.0.1",
     "axios": "^1.9.0",
+    "tsparticles": "^3.8.1",
     "vue": "^3.4.0",
     "vue-i18n": "^9.14.4"
   },
   "devDependencies": {
     "@types/node": "^22.15.17",
+    "@types/vue": "^1.0.31",
     "@vitejs/plugin-vue": "^5.2.3",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
