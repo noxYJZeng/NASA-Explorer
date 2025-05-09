@@ -27,7 +27,7 @@
 
     <!-- ───── 标题与说明 ───── -->
     <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-      🚀 NASA Explorer
+      Astronomy Picture of the Day
     </h1>
     <p class="text-gray-600 dark:text-gray-300">
       Explore the Astronomy Picture of the Day from NASA's open API.
