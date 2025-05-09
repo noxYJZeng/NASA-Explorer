@@ -18,36 +18,43 @@
         </button>
       </div>
   
-      <!-- 图表区域 -->
+      <!-- 图表 -->
       <canvas ref="chartRef" class="max-w-2xl mx-auto"></canvas>
-  
-      <!-- ✅ 正在绘图提示 -->
       <p v-if="drawingInProgress" class="text-sm text-yellow-600 mt-2">
         Drawing in progress...
       </p>
   
-      <!-- 数据来源说明 -->
+      <!-- 图表下说明 -->
       <p class="text-sm text-gray-500 mt-2 italic">
-        All asteroid data is based on NASA's predicted trajectories and close approach calculations.
+        Data from NASA's Near Earth Object Web Service
+      </p>
+      <p class="text-xs text-gray-400 dark:text-gray-500 italic mt-1">
+        Content is shown according to NASA's official publish time
       </p>
   
-      <!-- 日期切换 + Today 按钮 -->
-      <div class="flex justify-center items-center gap-6 my-6">
-        <button @click="changeSelectedDay(-1)" class="text-2xl px-3">←</button>
-        <span class="text-lg font-semibold">{{ selectedDate }}</span>
-        <button @click="changeSelectedDay(1)" class="text-2xl px-3">→</button>
+      <!-- 日期切换区域 -->
+      <div class="relative mt-4 mb-6">
+  
+        <!-- ← 日期 → 居中 -->
+        <div class="flex justify-center items-center gap-4">
+          <button @click="changeSelectedDay(-1)" class="text-2xl px-3">←</button>
+          <span class="text-lg font-semibold">{{ formatLocalDate(selectedDate) }}</span>
+          <button @click="changeSelectedDay(1)" class="text-2xl px-3">→</button>
+        </div>
+  
+        <!-- 📅 Today 靠右但居中一些 -->
         <button
           @click="goToToday"
-          class="text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition"
+          class="absolute right-[15%] top-1/2 -translate-y-1/2
+                 text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300
+                 dark:bg-gray-700 dark:hover:bg-gray-600 transition"
         >
           📅 Today
         </button>
       </div>
   
-      <!-- 表格标题 -->
-      <h3 class="text-xl font-semibold mb-4">Details for {{ selectedDate }}</h3>
-  
       <!-- 小行星表格 -->
+      <h3 class="text-xl font-semibold mb-4">Details for {{ formatLocalDate(selectedDate) }}</h3>
       <div class="overflow-x-auto max-w-5xl mx-auto">
         <table class="w-full text-sm text-left border-collapse">
           <thead>
@@ -77,12 +84,27 @@
           </tbody>
         </table>
       </div>
+  
+      <!-- NASA 实时轨道图像 -->
+      <h3 class="text-xl font-semibold my-6">Live NASA Orbit Viewer</h3>
+      <div class="w-full max-w-5xl mx-auto rounded overflow-hidden border h-[500px]">
+        <iframe
+          src="https://eyes.nasa.gov/apps/asteroids/"
+          width="100%"
+          height="100%"
+          style="border: none"
+          loading="lazy"
+          title="NASA Eyes on Asteroids"
+        ></iframe>
+      </div>
     </div>
   </template>
+  
   
   <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import { useAsteroidStats } from '@/composables/useAsteroidStats'
+  import { useUtcAlignedDate } from '@/composables/useUtcAlignedDate'
   
   const {
     chartRef,
@@ -90,21 +112,20 @@
     selectedDate,
     changeSelectedDay,
     displayList,
-    format,
     goToToday,
     loadTodayOnMount,
-    drawingInProgress, // ✅ 监控绘制状态
+    drawingInProgress,
   } = useAsteroidStats()
   
-  const startDate = ref(format(new Date()))
+  const { getUtcDateString, formatLocalDate } = useUtcAlignedDate()
   
-  /** Load 按钮逻辑：加载自定义 startDate */
+  const startDate = ref(getUtcDateString())
+  
   async function load() {
     await fetchChartWindow(startDate.value)
     selectedDate.value = startDate.value
   }
   
-  /** 页面加载时自动加载今天窗口 */
   onMounted(loadTodayOnMount)
   </script>
   

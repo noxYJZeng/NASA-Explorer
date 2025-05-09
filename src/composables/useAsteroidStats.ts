@@ -1,5 +1,8 @@
 import { ref, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
+import { useUtcAlignedDate } from './useUtcAlignedDate'
+
+const { getUtcDateString } = useUtcAlignedDate()
 
 export interface AsteroidInfo {
   name: string
@@ -247,7 +250,7 @@ export function useAsteroidStats() {
   }
 
   async function goToToday() {
-    const todayStr = format(new Date())
+    const todayStr = getUtcDateString()
     if (!chartLabels.value.includes(todayStr)) {
       await fetchChartWindow(todayStr, undefined, todayStr)
     } else {
@@ -257,13 +260,12 @@ export function useAsteroidStats() {
   }
   
   async function loadTodayOnMount() {
-    const todayStr = format(new Date())
+    const todayStr = getUtcDateString()
     await fetchChartWindow(todayStr)
     selectedDate.value = todayStr
     updateChartFromDataOnly()
   }
   
-
   return {
     chartRef,
     chartInstance,
