@@ -1,15 +1,27 @@
 <template>
-  <div id="cesiumContainer" class="w-full h-full" />
+  <div class="relative w-full h-full">
+    <div id="cesiumContainer" class="w-full h-full" />
+
+    <button
+      class="absolute top-4 right-4 z-10 px-4 py-2 bg-white text-black rounded shadow hover:bg-gray-100"
+      @click="toggleTracking"
+    >
+      {{ isTracking ? '🌍 View Earth' : '🛰 Track ISS' }}
+    </button>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, watch } from 'vue'
+import { onMounted, onBeforeUnmount, watch, ref } from 'vue'
 import * as Cesium from 'cesium'
+import 'cesium/Widgets/widgets.css'
 
 const props = defineProps<{ lat: number; lng: number }>()
+const isTracking = ref(true)
 
 let viewer: Cesium.Viewer
 let pathProperty: Cesium.SampledPositionProperty
+let issEntity: Cesium.Entity
 
 onMounted(async () => {
   Cesium.Ion.defaultAccessToken =
@@ -24,17 +36,29 @@ onMounted(async () => {
     navigationHelpButton: false,
     shouldAnimate: true
   })
+
   const imageryProvider = await Cesium.IonImageryProvider.fromAssetId(2)
   viewer.scene.imageryLayers.removeAll()
   viewer.scene.imageryLayers.addImageryProvider(imageryProvider)
 
   viewer.scene.globe.depthTestAgainstTerrain = false
+  viewer.clock.shouldAnimate = true
+  viewer.clock.multiplier = 10
 
   pathProperty = new Cesium.SampledPositionProperty()
-  const start = Cesium.Cartesian3.fromDegrees(props.lng, props.lat, 400000)
-  pathProperty.addSample(Cesium.JulianDate.now(), start)
+  pathProperty.setInterpolationOptions({
+    interpolationDegree: 1,
+    interpolationAlgorithm: Cesium.LinearApproximation
+  })
+  pathProperty.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD
+  pathProperty.forwardExtrapolationDuration = 60
 
-  const iss = viewer.entities.add({
+  const now = Cesium.JulianDate.clone(viewer.clock.currentTime)
+  const pos = Cesium.Cartesian3.fromDegrees(props.lng, props.lat, 400000)
+  pathProperty.addSample(now, pos)
+
+  issEntity = viewer.entities.add({
+    id: 'iss',
     name: 'ISS',
     position: pathProperty,
     point: new Cesium.PointGraphics({
@@ -58,14 +82,41 @@ onMounted(async () => {
     })
   })
 
-  viewer.trackedEntity = iss
+  viewer.trackedEntity = issEntity
 })
 
 watch(() => [props.lat, props.lng], ([lat, lng]) => {
-  const now = Cesium.JulianDate.now()
+  if (!viewer || !pathProperty) return
+
+  const now = Cesium.JulianDate.clone(viewer.clock.currentTime)
   const pos = Cesium.Cartesian3.fromDegrees(lng, lat, 400000)
-  pathProperty?.addSample(now, pos)
+  pathProperty.addSample(now, pos)
+
+  if (isTracking.value) {
+    viewer.trackedEntity = issEntity
+  }
 })
+
+function toggleTracking() {
+  if (!viewer || !issEntity) return
+
+  isTracking.value = !isTracking.value
+
+  if (isTracking.value) {
+    viewer.trackedEntity = issEntity
+  } else {
+    viewer.trackedEntity = undefined
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
+      orientation: {
+        heading: 0,
+        pitch: -Cesium.Math.PI_OVER_TWO,
+        roll: 0
+      },
+      duration: 2.5
+    })
+  }
+}
 
 onBeforeUnmount(() => {
   viewer?.destroy()
