@@ -11,7 +11,7 @@
         </span>
   
         <span>
-          Developed by
+          Developed with curiosity by
           <a
             href="https://github.com/noxYJZeng"
             target="_blank"
