@@ -2,12 +2,14 @@
   <div class="relative w-full h-full">
     <div id="cesiumContainer" class="w-full h-full" />
 
+    <!-- 切换按钮 -->
     <button
-      class="absolute top-4 right-4 z-10 px-4 py-2 bg-white text-black rounded shadow hover:bg-gray-100"
+      class="absolute top-1 right-1 z-50 px-4 py-1.5 bg-white text-black rounded-full shadow-lg hover:bg-gray-100"
       @click="toggleTracking"
     >
       {{ isTracking ? '🌍 View Earth' : '🛰 Track ISS' }}
     </button>
+
   </div>
 </template>
 
@@ -20,8 +22,8 @@ const props = defineProps<{ lat: number; lng: number }>()
 const isTracking = ref(true)
 
 let viewer: Cesium.Viewer
-let pathProperty: Cesium.SampledPositionProperty
 let issEntity: Cesium.Entity
+let pathProperty: Cesium.SampledPositionProperty
 
 onMounted(async () => {
   Cesium.Ion.defaultAccessToken =
@@ -40,7 +42,6 @@ onMounted(async () => {
   const imageryProvider = await Cesium.IonImageryProvider.fromAssetId(2)
   viewer.scene.imageryLayers.removeAll()
   viewer.scene.imageryLayers.addImageryProvider(imageryProvider)
-
   viewer.scene.globe.depthTestAgainstTerrain = false
   viewer.clock.shouldAnimate = true
   viewer.clock.multiplier = 10
@@ -104,6 +105,10 @@ function toggleTracking() {
 
   if (isTracking.value) {
     viewer.trackedEntity = issEntity
+    viewer.flyTo(issEntity, {
+      duration: 2.5,
+      offset: new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90), 1000000)
+    })
   } else {
     viewer.trackedEntity = undefined
     viewer.camera.flyTo({
@@ -127,5 +132,8 @@ onBeforeUnmount(() => {
 #cesiumContainer {
   width: 100%;
   height: 100%;
+  display: block;
+  position: relative;
 }
+
 </style>

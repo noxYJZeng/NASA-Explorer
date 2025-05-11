@@ -1,9 +1,10 @@
 <template>
-  <div class="p-6 text-center">
-    <h2 class="text-2xl font-bold mb-4">ISS Tracker</h2>
+  <div class="p-6 flex flex-col items-center space-y-6">
+    <!-- 标题 -->
+    <h2 class="text-2xl font-bold">ISS Tracker</h2>
 
     <!-- 切换按钮 -->
-    <div class="mb-4 flex justify-center gap-4">
+    <div class="flex gap-4">
       <button
         @click="viewMode = '2d'"
         :class="viewMode === '2d' ? activeBtn : inactiveBtn"
@@ -19,7 +20,7 @@
     </div>
 
     <!-- 经纬度显示 -->
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-300">
+    <div class="text-sm text-gray-600 dark:text-gray-300">
       <p v-if="loading">Loading ISS position...</p>
       <p v-else-if="error" class="text-red-500">Error: {{ error }}</p>
       <p v-else>
@@ -28,8 +29,8 @@
       </p>
     </div>
 
-    <!-- 地图容器 -->
-    <div class="w-full max-w-5xl mx-auto h-[500px] rounded overflow-hidden border">
+    <!-- 地图区域 -->
+    <div class="relative w-[800px] h-[500px] rounded-xl overflow-hidden border shadow">
       <IssMap2D
         v-if="viewMode === '2d'"
         :lat="latitude"
@@ -44,6 +45,8 @@
       />
     </div>
   </div>
+  <p class="text-s text-gray-500 italic">Updated every 5 seconds.</p>
+
 </template>
 
 <script setup lang="ts">
@@ -52,11 +55,23 @@ import { useIssTracker } from '@/composables/useIssTracker'
 import IssMap2D from './iss/IssMap2D.vue'
 import IssMap3D from './iss/IssMap3D.vue'
 
-const viewMode = ref<'2d' | '3d'>('2d')
+const viewMode = ref<'2d' | '3d'>('3d')
 
 const { latitude, longitude, loading, error } = useIssTracker()
 
-const activeBtn = 'px-4 py-1 rounded bg-blue-600 text-white font-semibold shadow'
+const activeBtn =
+  'px-4 py-1 rounded bg-blue-600 text-white font-semibold shadow transition'
 const inactiveBtn =
   'px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition'
 </script>
+
+
+<style scoped>
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+</style>
