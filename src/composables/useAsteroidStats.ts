@@ -1,8 +1,5 @@
 import { ref, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
-import { useDateHelpers } from './useUtcAlignedDate'
-
-const { getTodayDateString } = useDateHelpers()
 
 export interface AsteroidInfo {
   name: string
@@ -26,11 +23,15 @@ export function useAsteroidStats() {
   const drawingInProgress = ref(false)
 
   function format(date: Date): string {
-    return date.toISOString().split('T')[0]
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
   }
 
   function parseDate(dateStr: string): Date {
-    return new Date(dateStr + 'T00:00:00')
+    const [y, m, d] = dateStr.split('-').map(Number)
+    return new Date(y, m - 1, d)
   }
 
   function buildLabelArray(start: string): string[] {
@@ -52,28 +53,20 @@ export function useAsteroidStats() {
   function updateChartFromDataOnly(force = false) {
     updateDisplay()
 
-    if (chartDrawing) {
-      console.warn('Chart render skipped: drawing in progress')
-      drawingInProgress.value = true
-      setTimeout(() => {
-        drawingInProgress.value = false
-      }, 1000)
-      return
-    }
-
     chartDrawing = true
     drawingInProgress.value = false
 
     nextTick(() => {
       const canvas = chartRef.value
       if (!canvas) {
+        console.warn('Canvas element is null')
         chartDrawing = false
         return
       }
 
       const ctx = canvas.getContext('2d')
       if (!ctx) {
-        console.warn('Chart context not ready, skipping render.')
+        console.warn('Canvas context is null')
         chartDrawing = false
         return
       }
@@ -111,7 +104,7 @@ export function useAsteroidStats() {
 
       const freshCtx = canvas.getContext('2d')
       if (!freshCtx) {
-        console.warn('Fresh context not available, skipping chart creation.')
+        console.warn('Fresh canvas context is null. Skipping chart creation.')
         chartDrawing = false
         return
       }
@@ -139,9 +132,7 @@ export function useAsteroidStats() {
         },
         options: {
           responsive: true,
-          animation: {
-            duration: 300
-          },
+          animation: false,
           plugins: {
             tooltip: { mode: 'index' }
           },
@@ -176,8 +167,7 @@ export function useAsteroidStats() {
     }
 
     const url =
-      `https://api.nasa.gov/neo/rest/v1/feed?start_date=${start}` +
-      `&end_date=${end}&api_key=${API_KEY}`
+      `https://api.nasa.gov/neo/rest/v1/feed?start_date=${start}&end_date=${end}&api_key=${API_KEY}`
 
     const res = await fetch(url)
     const json = await res.json()
@@ -249,8 +239,17 @@ export function useAsteroidStats() {
     }
   }
 
+  async function loadTodayOnMount() {
+    const todayStr = format(new Date())
+    await nextTick()
+    await fetchChartWindow(todayStr)
+    selectedDate.value = todayStr
+    setTimeout(() => {
+      updateChartFromDataOnly()
+    }, 0)  }
+
   async function goToToday() {
-    const todayStr = getTodayDateString()
+    const todayStr = format(new Date())
     if (!chartLabels.value.includes(todayStr)) {
       await fetchChartWindow(todayStr, undefined, todayStr)
     } else {
@@ -258,14 +257,7 @@ export function useAsteroidStats() {
       updateChartFromDataOnly()
     }
   }
-  
-  async function loadTodayOnMount() {
-    const todayStr = getTodayDateString()
-    await fetchChartWindow(todayStr)
-    selectedDate.value = todayStr
-    updateChartFromDataOnly()
-  }
-  
+
   return {
     chartRef,
     chartInstance,
@@ -276,7 +268,6 @@ export function useAsteroidStats() {
     drawingInProgress,
     goToToday,
     loadTodayOnMount,
-
     format,
     changeSelectedDay,
     prevDay: () => changeSelectedDay(-1),

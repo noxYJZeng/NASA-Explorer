@@ -21,3 +21,15 @@ export const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  const isHardReload = performance?.navigation?.type === 1
+  const isDirectEntry = from.name == null
+
+  if (isHardReload && isDirectEntry && to.path !== '/apod') {
+    console.warn(`🔁 Hard refresh on ${to.path} — redirecting to /apod`)
+    next('/apod')
+  } else {
+    next()
+  }
+})
