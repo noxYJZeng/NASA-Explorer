@@ -32,22 +32,28 @@
       Content is shown according to local time
     </p>
 
-    <!-- 日期切换区域 -->
-    <div class="relative mt-4 mb-6">
-      <div class="flex justify-center items-center gap-4">
+    <!-- 外层容器用于控制整体位置 -->
+    <div class="relative mt-4 mb-6 h-10">
+      <!-- 中间：← 日期 → -->
+      <div
+        class="absolute left-1/2 -translate-x-1/2 flex items-center gap-4"
+      >
         <button @click="changeSelectedDay(-1)" class="text-2xl px-3">←</button>
-        <span class="text-lg font-semibold">{{ formatDateDisplay(selectedDate) }}</span>
+        <span class="text-lg font-semibold whitespace-nowrap">{{ formatDateDisplay(selectedDate) }}</span>
         <button @click="changeSelectedDay(1)" class="text-2xl px-3">→</button>
       </div>
+
+      <!-- 右边的 Today 按钮 -->
       <button
         @click="goToToday"
-        class="absolute right-[15%] top-1/2 -translate-y-1/2
-               text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300
-               dark:bg-gray-700 dark:hover:bg-gray-600 transition"
+        class="absolute right-6 top-1/2 -translate-y-1/2
+              text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300
+              dark:bg-gray-700 dark:hover:bg-gray-600 transition whitespace-nowrap"
       >
         📅 Today
       </button>
     </div>
+
 
     <!-- 小行星表格 -->
     <h3 class="text-xl font-semibold mb-4">Details for {{ formatDateDisplay(selectedDate) }}</h3>
