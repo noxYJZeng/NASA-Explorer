@@ -57,6 +57,9 @@
 
     <div v-if="apod" class="mt-6">
       <h2 class="text-2xl font-semibold mb-2">{{ apod.title }}</h2>
+      <p v-if="apod.copyright" class="mb-2 text-sm text-gray-500 dark:text-gray-400 italic">
+        © {{ apod.copyright }}
+      </p>
 
       <div v-if="apod.media_type === 'image'" class="mx-auto max-w-md">
         <img

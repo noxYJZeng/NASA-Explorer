@@ -22,7 +22,9 @@ export type ApodData = {
   date: string
   media_type: 'image' | 'video'
   thumbnail_url?: string
+  copyright?: string
 }
+
 
 export function useHomePage() {
   const today         = localISODate()

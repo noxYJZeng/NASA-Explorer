@@ -4,7 +4,6 @@
       Asteroid Statistics
     </h2>
 
-    <!-- 日期选择与加载 -->
     <div class="mb-6 flex flex-col sm:flex-row justify-center items-center gap-4">
       <label class="text-sm font-medium">Start Date:</label>
       <input
@@ -20,13 +19,11 @@
       </button>
     </div>
 
-    <!-- 图表区域 -->
     <div class="w-full max-w-3xl mx-auto">
       <canvas ref="chartRef" class="w-full h-[240px] sm:h-[320px] md:h-[400px]"></canvas>
     </div>
     <p v-if="drawingInProgress" class="text-sm text-yellow-600 mt-2">Drawing in progress...</p>
 
-    <!-- NASA 数据说明 -->
     <p class="text-sm text-gray-500 mt-4 italic">
       Data from NASA's Near Earth Object Web Service
     </p>
@@ -34,16 +31,13 @@
       Content is shown according to local time
     </p>
 
-    <!-- 外层容器：flex布局，响应式居中和右侧浮动 -->
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mt-6 mb-6">
-      <!-- 中间部分：← 日期 → -->
       <div class="flex justify-center items-center gap-3 flex-wrap">
         <button @click="changeSelectedDay(-1)" class="text-2xl px-3">←</button>
         <span class="text-base sm:text-lg font-semibold whitespace-nowrap">{{ formatDateDisplay(selectedDate) }}</span>
         <button @click="changeSelectedDay(1)" class="text-2xl px-3">→</button>
       </div>
 
-      <!-- 右侧 Today 按钮 -->
       <div class="flex justify-center sm:justify-end">
         <button
           @click="goToToday"
@@ -56,7 +50,6 @@
     </div>
 
 
-    <!-- 小行星表格 -->
     <h3 class="text-lg sm:text-xl font-semibold mb-4">Details for {{ formatDateDisplay(selectedDate) }}</h3>
     <div class="overflow-x-auto w-full">
       <table class="min-w-[600px] w-full text-sm text-left border-collapse">
@@ -88,7 +81,6 @@
       </table>
     </div>
 
-    <!-- NASA Orbit 图 -->
     <h3 class="text-lg sm:text-xl font-semibold my-6">Live NASA Orbit</h3>
     <div class="w-full max-w-5xl mx-auto rounded overflow-hidden border h-[300px] sm:h-[500px]">
       <iframe
