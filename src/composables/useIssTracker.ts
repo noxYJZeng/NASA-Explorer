@@ -11,7 +11,7 @@ export function useIssTracker() {
   const fetchPosition = async () => {
     try {
       loading.value = true
-      const res = await fetch('http://api.open-notify.org/iss-now.json')
+      const res = await fetch('https://api.open-notify.org/iss-now.json')
       const data = await res.json()
 
       if (data.message !== 'success') {
