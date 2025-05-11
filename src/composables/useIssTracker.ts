@@ -1,3 +1,4 @@
+// src/composables/useIssTracker.ts
 import { ref, onMounted, onUnmounted } from 'vue'
 
 export function useIssTracker() {
@@ -11,7 +12,12 @@ export function useIssTracker() {
   const fetchPosition = async () => {
     try {
       loading.value = true
-      const res = await fetch('https://api.open-notify.org/iss-now.json')
+      const res = await fetch('/.netlify/functions/iss-proxy') // Netlify proxy endpoint
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch ISS data')
+      }
+
       const data = await res.json()
 
       if (data.message !== 'success') {
@@ -30,7 +36,7 @@ export function useIssTracker() {
 
   onMounted(() => {
     fetchPosition()
-    intervalId = window.setInterval(fetchPosition, 5000) // 每 5 秒更新一次
+    intervalId = window.setInterval(fetchPosition, 5000)
   })
 
   onUnmounted(() => {
