@@ -1,4 +1,4 @@
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import Chart from 'chart.js/auto'
 
 export interface AsteroidInfo {
@@ -258,6 +258,24 @@ export function useAsteroidStats() {
     }
   }
 
+
+  let resizeListener: (() => void) | null = null
+  
+  onMounted(() => {
+    resizeListener = () => {
+      if (chartInstance.value) {
+        chartInstance.value.resize() // 👈 强制 Chart.js 响应式重新计算
+      }
+    }
+    window.addEventListener('resize', resizeListener)
+  })
+  
+  onBeforeUnmount(() => {
+    if (resizeListener) {
+      window.removeEventListener('resize', resizeListener)
+    }
+  })
+  
   return {
     chartRef,
     chartInstance,

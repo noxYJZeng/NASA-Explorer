@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 sm:p-6 text-center max-w-6xl mx-auto">
+  <div class="p-4 sm:p-6 text-center max-w-5xl mx-auto overflow-x-hidden">
     <h2 class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4">
       Asteroid Statistics
     </h2>
@@ -20,7 +20,7 @@
     </div>
 
     <div class="w-full max-w-3xl mx-auto">
-      <canvas ref="chartRef" class="w-full h-[240px] sm:h-[320px] md:h-[400px]"></canvas>
+      <canvas ref="chartRef" class="w-full h-[300px] sm:h-[400px]"></canvas>
     </div>
     <p v-if="drawingInProgress" class="text-sm text-yellow-600 mt-2">Drawing in progress...</p>
 
@@ -31,22 +31,23 @@
       Content is shown according to local time
     </p>
 
-    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mt-6 mb-6">
-      <div class="flex justify-center items-center gap-3 flex-wrap">
+    <div class="mt-6 mb-6 w-full flex flex-col items-center gap-3 sm:relative sm:h-10">
+      <div class="flex items-center gap-4 sm:absolute sm:left-1/2 sm:-translate-x-1/2">
         <button @click="changeSelectedDay(-1)" class="text-2xl px-3">←</button>
-        <span class="text-base sm:text-lg font-semibold whitespace-nowrap">{{ formatDateDisplay(selectedDate) }}</span>
+        <span class="text-base sm:text-lg font-semibold whitespace-nowrap">
+          {{ formatDateDisplay(selectedDate) }}
+        </span>
         <button @click="changeSelectedDay(1)" class="text-2xl px-3">→</button>
       </div>
 
-      <div class="flex justify-center sm:justify-end">
-        <button
-          @click="goToToday"
-          class="text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300
-                dark:bg-gray-700 dark:hover:bg-gray-600 transition whitespace-nowrap"
-        >
-          📅 Today
-        </button>
-      </div>
+      <button
+        @click="goToToday"
+        class="text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300
+              dark:bg-gray-700 dark:hover:bg-gray-600 transition whitespace-nowrap
+              sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2"
+      >
+        📅 Today
+      </button>
     </div>
 
 
@@ -81,6 +82,7 @@
       </table>
     </div>
 
+    <!-- NASA Orbit -->
     <h3 class="text-lg sm:text-xl font-semibold my-6">Live NASA Orbit</h3>
     <div class="w-full max-w-5xl mx-auto rounded overflow-hidden border h-[300px] sm:h-[500px]">
       <iframe
