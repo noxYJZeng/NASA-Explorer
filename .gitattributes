@@ -1,2 +1,5 @@
-public/cesium/* linguist-vendored
-node_modules/* linguist-vendored
+node_modules/**         linguist-vendored
+public/cesium/**        linguist-vendored
+dist/**                 linguist-vendored
+*.min.js                linguist-generated
+*.min.css               linguist-generated
