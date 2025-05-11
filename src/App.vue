@@ -1,14 +1,16 @@
 <template>
   <div :class="{ dark: isDark }" class="bg-gray-50 dark:bg-gray-900">
-    
     <CosmicLoading v-if="!hasLoaded" :fade="!isLoading" class="fixed inset-0 z-[9999]" />
 
     <div
       v-show="!isLoading"
-      class="min-h-screen text-black dark:text-white transition-colors duration-300 py-12 px-4 flex flex-col items-center"
+      class="min-h-screen text-black dark:text-white transition-colors duration-300 py-6 px-4 sm:px-6 lg:px-8 flex flex-col items-center"
     >
       <Navbar :isDark="isDark" @toggle-dark="toggleDarkMode" />
-      <RouterView />
+
+      <div class="w-full max-w-6xl mx-auto">
+        <RouterView />
+      </div>
     </div>
 
     <Footer />
@@ -29,6 +31,7 @@ const hasLoaded = ref(false)
 function applyDark(value: boolean) {
   document.documentElement.classList.toggle('dark', value)
 }
+
 function toggleDarkMode() {
   isDark.value = !isDark.value
   applyDark(isDark.value)

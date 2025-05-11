@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'gray-150': '#f4f4f5' // 用于 light 模式的按钮背景色
+        'gray-150': '#f4f4f5'
       }
     },
   },

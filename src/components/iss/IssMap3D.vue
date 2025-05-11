@@ -2,7 +2,6 @@
   <div class="relative w-full h-full">
     <div id="cesiumContainer" class="w-full h-full" />
 
-    <!-- 切换按钮 -->
     <button
       class="absolute top-1 right-1 z-50 px-4 py-1.5 bg-white text-black rounded-full shadow-lg hover:bg-gray-100"
       @click="toggleTracking"

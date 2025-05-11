@@ -1,64 +1,65 @@
 <template>
-  <div class="p-6 text-center">
-    <h2 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">Asteroid Statistics</h2>
+  <div class="p-4 sm:p-6 text-center max-w-6xl mx-auto">
+    <h2 class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4">
+      Asteroid Statistics
+    </h2>
 
     <!-- 日期选择与加载 -->
-    <div class="mb-6 flex justify-center gap-4 items-center">
+    <div class="mb-6 flex flex-col sm:flex-row justify-center items-center gap-4">
       <label class="text-sm font-medium">Start Date:</label>
       <input
         type="date"
         v-model="startDate"
-        class="rounded px-3 py-1 border dark:bg-gray-800 dark:text-white"
+        class="rounded px-3 py-1 border w-full sm:w-auto dark:bg-gray-800 dark:text-white"
       />
       <button
         @click="load"
-        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition w-full sm:w-auto"
       >
         Load
       </button>
     </div>
 
-    <!-- 图表 -->
-    <canvas ref="chartRef" class="max-w-2xl mx-auto"></canvas>
-    <p v-if="drawingInProgress" class="text-sm text-yellow-600 mt-2">
-      Drawing in progress...
-    </p>
+    <!-- 图表区域 -->
+    <div class="w-full max-w-3xl mx-auto">
+      <canvas ref="chartRef" class="w-full h-[240px] sm:h-[320px] md:h-[400px]"></canvas>
+    </div>
+    <p v-if="drawingInProgress" class="text-sm text-yellow-600 mt-2">Drawing in progress...</p>
 
     <!-- NASA 数据说明 -->
-    <p class="text-sm text-gray-500 mt-2 italic">
+    <p class="text-sm text-gray-500 mt-4 italic">
       Data from NASA's Near Earth Object Web Service
     </p>
     <p class="text-xs text-gray-400 dark:text-gray-500 italic mt-1">
       Content is shown according to local time
     </p>
 
-    <!-- 外层容器用于控制整体位置 -->
-    <div class="relative mt-4 mb-6 h-10">
-      <!-- 中间：← 日期 → -->
-      <div
-        class="absolute left-1/2 -translate-x-1/2 flex items-center gap-4"
-      >
+    <!-- 外层容器：flex布局，响应式居中和右侧浮动 -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mt-6 mb-6">
+      <!-- 中间部分：← 日期 → -->
+      <div class="flex justify-center items-center gap-3 flex-wrap">
         <button @click="changeSelectedDay(-1)" class="text-2xl px-3">←</button>
-        <span class="text-lg font-semibold whitespace-nowrap">{{ formatDateDisplay(selectedDate) }}</span>
+        <span class="text-base sm:text-lg font-semibold whitespace-nowrap">{{ formatDateDisplay(selectedDate) }}</span>
         <button @click="changeSelectedDay(1)" class="text-2xl px-3">→</button>
       </div>
 
-      <!-- 右边的 Today 按钮 -->
-      <button
-        @click="goToToday"
-        class="absolute right-6 top-1/2 -translate-y-1/2
-              text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300
-              dark:bg-gray-700 dark:hover:bg-gray-600 transition whitespace-nowrap"
-      >
-        📅 Today
-      </button>
+      <!-- 右侧 Today 按钮 -->
+      <div class="flex justify-center sm:justify-end">
+        <button
+          @click="goToToday"
+          class="text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300
+                dark:bg-gray-700 dark:hover:bg-gray-600 transition whitespace-nowrap"
+        >
+          📅 Today
+        </button>
+      </div>
     </div>
 
 
     <!-- 小行星表格 -->
-    <h3 class="text-xl font-semibold mb-4">Details for {{ formatDateDisplay(selectedDate) }}</h3>
-    <div class="overflow-x-auto max-w-5xl mx-auto">
-      <table class="w-full text-sm text-left border-collapse">
+    <h3 class="text-lg sm:text-xl font-semibold mb-4">Details for {{ formatDateDisplay(selectedDate) }}</h3>
+    <div class="overflow-x-auto w-full">
+      <table class="min-w-[600px] w-full text-sm text-left border-collapse">
         <thead>
           <tr class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
             <th class="p-2 border">Name</th>
@@ -88,8 +89,8 @@
     </div>
 
     <!-- NASA Orbit 图 -->
-    <h3 class="text-xl font-semibold my-6">Live NASA Orbit</h3>
-    <div class="w-full max-w-5xl mx-auto rounded overflow-hidden border h-[500px]">
+    <h3 class="text-lg sm:text-xl font-semibold my-6">Live NASA Orbit</h3>
+    <div class="w-full max-w-5xl mx-auto rounded overflow-hidden border h-[300px] sm:h-[500px]">
       <iframe
         src="https://eyes.nasa.gov/apps/asteroids/"
         width="100%"
@@ -119,16 +120,12 @@ const {
 
 function getTodayDateString(): string {
   const today = new Date()
-  const y = today.getFullYear()
-  const m = String(today.getMonth() + 1).padStart(2, '0')
-  const d = String(today.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 }
 
 function formatDateDisplay(dateStr: string): string {
   const [y, m, d] = dateStr.split('-').map(Number)
-  const date = new Date(y, m - 1, d)
-  return date.toLocaleDateString(undefined, {
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
@@ -143,10 +140,8 @@ async function load() {
   selectedDate.value = startDate.value
 }
 
-// ✅ 等 chartRef 被挂载且 DOM 准备好后再加载图表
 watch(chartRef, async (el) => {
   if (el) {
-    console.log('✅ chartRef mounted')
     await nextTick()
     await loadTodayOnMount()
   }
