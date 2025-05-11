@@ -1,7 +1,7 @@
 <template>
   <div class="p-6 flex flex-col items-center space-y-6">
     <!-- 标题 -->
-    <h2 class="text-2xl font-bold">ISS Tracker</h2>
+    <h2 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">ISS Tracker</h2>
 
     <!-- 切换按钮 -->
     <div class="flex gap-4">

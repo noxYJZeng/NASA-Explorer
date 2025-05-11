@@ -34,7 +34,7 @@
     </p>
     <p class="text-xs text-gray-400 dark:text-gray-500 italic">
       Content is shown according to NASA's official publish time
-    </p>
+  </p>
 
     <!-- 📅 日期选择器 -->
     <input

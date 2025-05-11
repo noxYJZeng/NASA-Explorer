@@ -1,8 +1,7 @@
 <template>
     <div class="p-6 text-center">
-      <h2 class="text-2xl font-bold mb-4">Asteroid Statistics</h2>
+      <h2 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">Asteroid Statistics</h2>
   
-      <!-- 日期选择器 -->
       <div class="mb-6 flex justify-center gap-4 items-center">
         <label class="text-sm font-medium">Start Date:</label>
         <input
@@ -18,18 +17,16 @@
         </button>
       </div>
   
-      <!-- 图表 -->
       <canvas ref="chartRef" class="max-w-2xl mx-auto"></canvas>
       <p v-if="drawingInProgress" class="text-sm text-yellow-600 mt-2">
         Drawing in progress...
       </p>
   
-      <!-- 图表下说明 -->
       <p class="text-sm text-gray-500 mt-2 italic">
         Data from NASA's Near Earth Object Web Service
       </p>
       <p class="text-xs text-gray-400 dark:text-gray-500 italic mt-1">
-        Content is shown according to NASA's official publish time
+        Content is shown according to local time
       </p>
   
       <!-- 日期切换区域 -->
@@ -104,7 +101,7 @@
   <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import { useAsteroidStats } from '@/composables/useAsteroidStats'
-  import { useUtcAlignedDate } from '@/composables/useUtcAlignedDate'
+  import { useDateHelpers } from '@/composables/useUtcAlignedDate'
   
   const {
     chartRef,
@@ -117,9 +114,9 @@
     drawingInProgress,
   } = useAsteroidStats()
   
-  const { getUtcDateString, formatLocalDate } = useUtcAlignedDate()
+  const { getTodayDateString, formatDateForDisplay: formatLocalDate } = useDateHelpers()
   
-  const startDate = ref(getUtcDateString())
+  const startDate = ref(getTodayDateString())
   
   async function load() {
     await fetchChartWindow(startDate.value)
