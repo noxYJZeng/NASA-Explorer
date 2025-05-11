@@ -24,7 +24,6 @@
   
     marker = L.marker([props.lat, props.lng]).addTo(map).bindPopup('🛰 ISS')
   
-    // 防止蓝色 marker 丢失（默认图标修复）
     const iconUrl = 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png'
     const shadowUrl = 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png'
     marker.setIcon(

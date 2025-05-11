@@ -1,11 +1,16 @@
 <template>
-    <div id="cosmic-container"></div>
+    <div id="cosmic-container" :class="{ fadeOut: fade }">
+      <div class="welcome-text">Welcome to<br />NASA Explorer</div>
+      <div class="loading-text">Loading...</div>
+    </div>
   </template>
   
   <script setup lang="ts">
-  import { onMounted, onBeforeUnmount } from 'vue'
+  import { onMounted, onBeforeUnmount, defineProps } from 'vue'
   import * as THREE from 'three'
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+  
+  const props = defineProps<{ fade: boolean }>()
   
   let renderer: THREE.WebGLRenderer
   let scene: THREE.Scene
@@ -74,7 +79,8 @@
             `#include <color_vertex>
             d = length(abs(position)/vec3(40.,10.,40.));
             d = clamp(d, 0., 1.);
-            vColor = mix(vec3(0.,0.,1.), vec3(0.05,0.05,0.1), d);`
+            float pulse = 0.5 + 0.5 * sin(time + d * 10.0);
+            vColor = mix(vec3(0.1,0.1,0.3), vec3(0.6,0.7,1.0), pulse);`
           )
           .replace(
             '#include <begin_vertex>',
@@ -100,7 +106,7 @@
             'vec4 diffuseColor = vec4( vColor, smoothstep(0.5, 0.1, d));'
           )
       }
-    } as any) // 👈 这里用 `as any` 解决 TS 类型限制
+    } as any)
   
     const p = new THREE.Points(g, m)
     p.rotation.order = 'ZYX'
@@ -109,7 +115,7 @@
   
     const clock = new THREE.Clock()
     const animate = () => {
-      gu.time.value = clock.getElapsedTime() * Math.PI
+      gu.time.value = clock.getElapsedTime()
       p.rotation.y = clock.getElapsedTime() * 0.05
       controls.update()
       renderer.render(scene, camera)
@@ -135,10 +141,37 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: black;
+    background: #000010;
+    transition: opacity 1s ease;
   }
-  canvas {
-    display: block;
+  .fadeOut {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .welcome-text {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    font-weight: bold;
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+  }
+  .loading-text {
+    position: absolute;
+    top: 34%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
   }
   </style>
   

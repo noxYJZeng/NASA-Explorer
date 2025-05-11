@@ -4,7 +4,6 @@
     class="w-full max-w-2xl mx-auto rounded-2xl shadow-lg p-6 text-center
            bg-white dark:bg-gray-800 transition relative">
 
-    <!-- ◀── 左右圆形按钮 ──▶ -->
     <button
       ref="prevBtn"
       class="nav-btn left-8"
@@ -25,7 +24,6 @@
       </svg>
     </button>
 
-    <!-- ───── 标题与说明 ───── -->
     <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
       Astronomy Picture of the Day
     </h1>
@@ -33,10 +31,9 @@
       Explore the Astronomy Picture of the Day from NASA's open API.
     </p>
     <p class="text-xs text-gray-400 dark:text-gray-500 italic">
-      Content is shown according to NASA's official publish time
+      Content is shown according to local time
   </p>
 
-    <!-- 📅 日期选择器 -->
     <input
       type="date"
       :max="today"
@@ -45,26 +42,22 @@
       class="mt-4 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
              text-black dark:text-white px-3 py-1 rounded" />
 
-    <!-- 🔁 今天按钮 -->
     <button
       class="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700
              text-white rounded transition"
       @click="goToToday">
-      Get Today’s Image
+      Get Today's Image
     </button>
 
-    <!-- 🌟 友好提示 / 加载 / 错误 -->
     <div v-if="notice" class="mt-4 text-yellow-600 dark:text-yellow-400 text-sm italic">
       {{ notice }}
     </div>
     <div v-if="loading" class="mt-4 text-gray-500 dark:text-gray-400">Loading…</div>
     <div v-else-if="error" class="mt-4 text-red-500 dark:text-red-400">Error: {{ error }}</div>
 
-    <!-- ✅ 成功展示 -->
     <div v-if="apod" class="mt-6">
       <h2 class="text-2xl font-semibold mb-2">{{ apod.title }}</h2>
 
-      <!-- 图片展示（可加载后触发滚动） -->
       <div v-if="apod.media_type === 'image'" class="mx-auto max-w-md">
         <img
           ref="imageEl"
@@ -82,7 +75,6 @@
         </p>
       </div>
 
-      <!-- 视频展示 -->
       <template v-else-if="apod.media_type === 'video'">
         <div v-if="apod.thumbnail_url && !showVideo" class="relative inline-block">
           <img :src="apod.thumbnail_url"

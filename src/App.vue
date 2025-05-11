@@ -1,8 +1,7 @@
 <template>
   <div :class="{ dark: isDark }" class="bg-gray-50 dark:bg-gray-900">
     
-    <!-- 👇 加载动画层 -->
-    <CosmicLoader v-if="isLoading" class="fixed inset-0 z-[9999]" />
+    <CosmicLoading v-if="!hasLoaded" :fade="!isLoading" class="fixed inset-0 z-[9999]" />
 
     <div
       v-show="!isLoading"
@@ -21,10 +20,11 @@ import { ref, onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
-import CosmicLoader from '@/components/CosmicLoading.vue'
+import CosmicLoading from '@/components/CosmicLoading.vue'
 
 const isDark = ref(false)
 const isLoading = ref(true)
+const hasLoaded = ref(false)
 
 function applyDark(value: boolean) {
   document.documentElement.classList.toggle('dark', value)
@@ -38,9 +38,11 @@ onMounted(() => {
   isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
   applyDark(isDark.value)
 
-  // 👇 模拟页面加载完成（可换成真实加载状态）
   setTimeout(() => {
     isLoading.value = false
-  }, 3000) // 可根据资源加载耗时自定义时长
+    setTimeout(() => {
+      hasLoaded.value = true
+    }, 2200)
+  }, 5000)
 })
 </script>
