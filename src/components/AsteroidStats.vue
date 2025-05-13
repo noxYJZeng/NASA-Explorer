@@ -1,7 +1,7 @@
 <template>
   <div class="p-4 sm:p-6 text-center max-w-5xl mx-auto overflow-x-hidden">
     <h2 class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4">
-      Asteroid Statistics
+      Near-Earth Asteroid Statistics
     </h2>
 
     <div class="mb-6 flex flex-col sm:flex-row justify-center items-center gap-4">
