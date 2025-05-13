@@ -1,4 +1,4 @@
-import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 import Chart from 'chart.js/auto'
 
 export interface AsteroidInfo {
@@ -246,7 +246,8 @@ export function useAsteroidStats() {
     selectedDate.value = todayStr
     setTimeout(() => {
       updateChartFromDataOnly()
-    }, 0)  }
+    }, 0)
+  }
 
   async function goToToday() {
     const todayStr = format(new Date())
@@ -258,24 +259,34 @@ export function useAsteroidStats() {
     }
   }
 
+  // ✅ 自动更新图表：监听 selectedDate 的变化
+  watch(selectedDate, async (newDate) => {
+    if (!newDate) return
+    const inRange = chartLabels.value.includes(newDate)
+    if (inRange) {
+      updateChartFromDataOnly()
+    } else {
+      await fetchChartWindow(newDate, undefined, newDate)
+    }
+  })
 
   let resizeListener: (() => void) | null = null
-  
+
   onMounted(() => {
     resizeListener = () => {
       if (chartInstance.value) {
-        chartInstance.value.resize() // 👈 强制 Chart.js 响应式重新计算
+        chartInstance.value.resize()
       }
     }
     window.addEventListener('resize', resizeListener)
   })
-  
+
   onBeforeUnmount(() => {
     if (resizeListener) {
       window.removeEventListener('resize', resizeListener)
     }
   })
-  
+
   return {
     chartRef,
     chartInstance,

@@ -11,12 +11,7 @@
         v-model="startDate"
         class="rounded px-3 py-1 border w-full sm:w-auto dark:bg-gray-800 dark:text-white"
       />
-      <button
-        @click="load"
-        class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition w-full sm:w-auto"
-      >
-        Load
-      </button>
+
     </div>
 
     <div class="w-full max-w-3xl mx-auto">
@@ -98,20 +93,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted } from 'vue'
 import { useAsteroidStats } from '@/composables/useAsteroidStats'
 
-const {
-  chartRef,
-  fetchChartWindow,
-  selectedDate,
-  changeSelectedDay,
-  displayList,
-  goToToday,
-  loadTodayOnMount,
-  drawingInProgress,
-} = useAsteroidStats()
-
+// 日期工具函数
 function getTodayDateString(): string {
   const today = new Date()
   return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
@@ -127,17 +112,45 @@ function formatDateDisplay(dateStr: string): string {
   })
 }
 
+// 响应式状态
 const startDate = ref(getTodayDateString())
+const {
+  chartRef,
+  fetchChartWindow,
+  selectedDate,
+  changeSelectedDay,
+  displayList,
+  goToToday,
+  loadTodayOnMount,
+  drawingInProgress,
+} = useAsteroidStats()
 
+// 加载逻辑（加载 chart 数据 + 设置当前选中日期）
 async function load() {
   await fetchChartWindow(startDate.value)
   selectedDate.value = startDate.value
 }
 
+// ✅ 页面加载后首次调用（加载今天）
+onMounted(async () => {
+  await load()
+})
+
+// ✅ 监听日期变动 → 自动加载数据（替代“Load”按钮）
+watch(startDate, async (newDate, oldDate) => {
+  if (newDate !== oldDate) {
+    await load()
+  }
+})
+
+// ✅ 图表渲染完挂载后加载（冗余但安全）
 watch(chartRef, async (el) => {
   if (el) {
     await nextTick()
     await loadTodayOnMount()
   }
 })
+
+// 导出工具函数供模板使用
+defineExpose({ formatDateDisplay, selectedDate, changeSelectedDay, goToToday, displayList, chartRef, drawingInProgress })
 </script>
