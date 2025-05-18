@@ -4,6 +4,7 @@
     class="w-full max-w-2xl mx-auto rounded-2xl shadow-lg p-6 text-center
            bg-white dark:bg-gray-800 transition relative">
 
+    <!-- 导航按钮 -->
     <button
       ref="prevBtn"
       class="nav-btn left-8"
@@ -24,6 +25,7 @@
       </svg>
     </button>
 
+    <!-- 标题 & 描述 -->
     <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
       Astronomy Picture of the Day
     </h1>
@@ -34,6 +36,7 @@
       Content is shown according to local time
     </p>
 
+    <!-- 日期选择 + 按钮 -->
     <input
       type="date"
       :max="today"
@@ -49,18 +52,21 @@
       Get Today's Image
     </button>
 
+    <!-- 状态显示 -->
     <div v-if="notice" class="mt-4 text-yellow-600 dark:text-yellow-400 text-sm italic">
       {{ notice }}
     </div>
     <div v-if="loading" class="mt-4 text-gray-500 dark:text-gray-400">Loading…</div>
     <div v-else-if="error" class="mt-4 text-red-500 dark:text-red-400">Error: {{ error }}</div>
 
+    <!-- 内容显示 -->
     <div v-if="apod" class="mt-6">
       <h2 class="text-2xl font-semibold mb-2">{{ apod.title }}</h2>
       <p v-if="apod.copyright" class="mb-2 text-sm text-gray-500 dark:text-gray-400 italic">
         © {{ apod.copyright }}
       </p>
 
+      <!-- 图片类型 -->
       <div v-if="apod.media_type === 'image'" class="mx-auto max-w-md">
         <img
           ref="imageEl"
@@ -78,6 +84,7 @@
         </p>
       </div>
 
+      <!-- 视频类型 -->
       <template v-else-if="apod.media_type === 'video'">
         <div v-if="apod.thumbnail_url && !showVideo" class="relative inline-block">
           <img :src="apod.thumbnail_url"
@@ -91,7 +98,7 @@
         </div>
 
         <template v-if="!apod.thumbnail_url || showVideo">
-          <!-- YouTube 视频嵌入 -->
+          <!-- ✅ YouTube 嵌入 -->
           <iframe
             v-if="isYoutube(apod.url)"
             :src="getEmbeddableUrl(apod.url)"
@@ -99,16 +106,26 @@
             allowfullscreen>
           </iframe>
 
+          <!-- ✅ MP4 视频播放 -->
           <video
-            v-else
+            v-else-if="apod.url.endsWith('.mp4')"
             :src="apod.url"
             controls
             class="mx-auto rounded shadow max-w-md aspect-video">
             Your browser does not support the video tag.
           </video>
+
+          <!-- ❗️Fallback 链接打开 -->
+          <a v-else
+             :href="apod.url"
+             target="_blank"
+             class="inline-block text-blue-500 underline mt-4">
+            ▶ Click to view video
+          </a>
         </template>
       </template>
 
+      <!-- 说明文字 -->
       <p class="mt-4 text-left text-sm text-gray-700 dark:text-gray-200 px-6">
         {{ apod.explanation }}
       </p>
@@ -136,7 +153,6 @@ const shouldScrollToImage = ref(false)
 function scrollToImageCenter() {
   const el = imageEl.value
   if (!el) return
-
   const rect = el.getBoundingClientRect()
   const scrollY = window.scrollY + rect.top + rect.height / 2 - window.innerHeight / 2
   window.scrollTo({ top: scrollY, behavior: 'smooth' })
