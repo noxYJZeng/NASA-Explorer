@@ -32,7 +32,7 @@
     </p>
     <p class="text-xs text-gray-400 dark:text-gray-500 italic">
       Content is shown according to local time
-  </p>
+    </p>
 
     <input
       type="date"
@@ -89,10 +89,24 @@
             ▶
           </button>
         </div>
-        <iframe v-if="!apod.thumbnail_url || showVideo"
-                :src="apod.url"
-                class="mx-auto rounded shadow max-w-md aspect-video"
-                allowfullscreen></iframe>
+
+        <template v-if="!apod.thumbnail_url || showVideo">
+          <!-- YouTube 视频嵌入 -->
+          <iframe
+            v-if="isYoutube(apod.url)"
+            :src="getEmbeddableUrl(apod.url)"
+            class="mx-auto rounded shadow max-w-md aspect-video"
+            allowfullscreen>
+          </iframe>
+
+          <video
+            v-else
+            :src="apod.url"
+            controls
+            class="mx-auto rounded shadow max-w-md aspect-video">
+            Your browser does not support the video tag.
+          </video>
+        </template>
       </template>
 
       <p class="mt-4 text-left text-sm text-gray-700 dark:text-gray-200 px-6">
@@ -149,6 +163,21 @@ function openHd() {
   if (apod.value?.hdurl) {
     window.open(apod.value.hdurl, '_blank')
   }
+}
+
+function isYoutube(url: string) {
+  return url.includes('youtube.com') || url.includes('youtu.be')
+}
+
+function getEmbeddableUrl(url: string) {
+  if (url.includes('youtube.com/watch')) {
+    const videoId = url.split('v=')[1]?.split('&')[0]
+    return `https://www.youtube.com/embed/${videoId}`
+  } else if (url.includes('youtu.be')) {
+    const videoId = url.split('youtu.be/')[1]
+    return `https://www.youtube.com/embed/${videoId}`
+  }
+  return url
 }
 </script>
 
