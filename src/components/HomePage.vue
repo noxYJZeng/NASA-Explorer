@@ -4,28 +4,18 @@
     class="w-full max-w-2xl mx-auto rounded-2xl shadow-lg p-6 text-center
            bg-white dark:bg-gray-800 transition relative">
 
-    <!-- 导航按钮 -->
-    <button
-      ref="prevBtn"
-      class="nav-btn left-8"
-      :disabled="loading"
-      @click="onPrev">
+    <button class="nav-btn left-8" :disabled="loading" @click="onPrev">
       <svg viewBox="0 0 24 24" class="w-5 h-5 fill-white -translate-x-[2px]">
         <polygon points="15,6 9,12 15,18"/>
       </svg>
     </button>
-
-    <button
-      ref="nextBtn"
-      class="nav-btn right-8"
-      :disabled="loading || selectedDate === today"
-      @click="onNext">
+    <button class="nav-btn right-8" :disabled="loading || selectedDate === today" @click="onNext">
       <svg viewBox="0 0 24 24" class="w-5 h-5 fill-white translate-x-[2px]">
         <polygon points="9,6 15,12 9,18"/>
       </svg>
     </button>
 
-    <!-- 标题 & 描述 -->
+    <!-- 标题 -->
     <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
       Astronomy Picture of the Day
     </h1>
@@ -36,7 +26,6 @@
       Content is shown according to local time
     </p>
 
-    <!-- 日期选择 + 按钮 -->
     <input
       type="date"
       :max="today"
@@ -59,14 +48,12 @@
     <div v-if="loading" class="mt-4 text-gray-500 dark:text-gray-400">Loading…</div>
     <div v-else-if="error" class="mt-4 text-red-500 dark:text-red-400">Error: {{ error }}</div>
 
-    <!-- 内容显示 -->
     <div v-if="apod" class="mt-6">
       <h2 class="text-2xl font-semibold mb-2">{{ apod.title }}</h2>
       <p v-if="apod.copyright" class="mb-2 text-sm text-gray-500 dark:text-gray-400 italic">
         © {{ apod.copyright }}
       </p>
 
-      <!-- 图片类型 -->
       <div v-if="apod.media_type === 'image'" class="mx-auto max-w-md">
         <img
           ref="imageEl"
@@ -84,9 +71,9 @@
         </p>
       </div>
 
-      <!-- 视频类型 -->
+      <!-- 视频 -->
       <template v-else-if="apod.media_type === 'video'">
-        <div v-if="apod.thumbnail_url && !showVideo" class="relative inline-block">
+        <div v-if="apod.thumbnail_url && isYoutube(apod.url) && !showVideo" class="relative inline-block">
           <img :src="apod.thumbnail_url"
                :alt="apod.title"
                class="mx-auto rounded shadow max-w-md" />
@@ -97,8 +84,7 @@
           </button>
         </div>
 
-        <template v-if="!apod.thumbnail_url || showVideo">
-          <!-- ✅ YouTube 嵌入 -->
+        <template v-if="showVideo || !isYoutube(apod.url)">
           <iframe
             v-if="isYoutube(apod.url)"
             :src="getEmbeddableUrl(apod.url)"
@@ -106,26 +92,32 @@
             allowfullscreen>
           </iframe>
 
-          <!-- ✅ MP4 视频播放 -->
           <video
-            v-else-if="apod.url.endsWith('.mp4')"
+            v-else-if="apod.url?.endsWith('.mp4')"
             :src="apod.url"
             controls
             class="mx-auto rounded shadow max-w-md aspect-video">
             Your browser does not support the video tag.
           </video>
 
-          <!-- ❗️Fallback 链接打开 -->
-          <a v-else
-             :href="apod.url"
-             target="_blank"
-             class="inline-block text-blue-500 underline mt-4">
-            ▶ Click to view video
-          </a>
+          <button v-else @click="openFallbackLink"
+                  class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            ▶ Open content in new tab
+          </button>
         </template>
       </template>
 
-      <!-- 说明文字 -->
+      <!-- fallback for media_type === 'other' or url missing -->
+      <template v-else>
+        <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 italic">
+          NASA did not provide a direct media URL. Try opening the fallback page:
+        </p>
+        <button @click="openFallbackLink"
+                class="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+          ▶ Open fallback APOD page
+        </button>
+      </template>
+
       <p class="mt-4 text-left text-sm text-gray-700 dark:text-gray-200 px-6">
         {{ apod.explanation }}
       </p>
@@ -134,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useHomePage } from '../composables/useHomePage'
 
 const {
@@ -146,7 +138,6 @@ const {
 
 const hoverHd = ref(false)
 const showVideo = ref(false)
-
 const imageEl = ref<HTMLImageElement | null>(null)
 const shouldScrollToImage = ref(false)
 
@@ -168,11 +159,13 @@ function onImageLoad() {
 function onPrev() {
   prevDay()
   shouldScrollToImage.value = true
+  showVideo.value = false
 }
 
 function onNext() {
   nextDay()
   shouldScrollToImage.value = true
+  showVideo.value = false
 }
 
 function openHd() {
@@ -181,8 +174,26 @@ function openHd() {
   }
 }
 
+function openFallbackLink() {
+  let link = apod.value?.url
+  if (!link && apod.value?.date) {
+    link = getDefaultApodHtmlUrl(apod.value.date)
+    console.log('[Fallback] Constructed APOD URL:', link)
+  }
+  if (link) {
+    window.open(link, '_blank')
+  } else {
+    alert("NASA did not provide a usable content link.")
+  }
+}
+
+function getDefaultApodHtmlUrl(date: string): string {
+  const [year, month, day] = date.split('-')
+  return `https://apod.nasa.gov/apod/ap${String(year).slice(2)}${month}${day}.html`
+}
+
 function isYoutube(url: string) {
-  return url.includes('youtube.com') || url.includes('youtu.be')
+  return url?.includes('youtube.com') || url?.includes('youtu.be')
 }
 
 function getEmbeddableUrl(url: string) {
@@ -195,6 +206,10 @@ function getEmbeddableUrl(url: string) {
   }
   return url
 }
+
+watch(apod, (val) => {
+  if (val) console.log('[DEBUG] APOD:', val)
+})
 </script>
 
 <style scoped>
@@ -206,10 +221,8 @@ function getEmbeddableUrl(url: string) {
           text-white transition
           disabled:opacity-30;
 }
-
 .left-8  { left: 2rem; }
 .right-8 { right: 2rem; }
-
 @media (max-width: 450px) {
   .left-8  { left: 1rem; }
   .right-8 { right: 1rem; }
