@@ -75,19 +75,18 @@ export function useHomePage() {
         apod.value = data
         selectedDate.value = data.date
         notice.value =
-          `Content is shown according to NASA's official publish time — displaying ${data.date}.`
+          `NASA doesn't publish new content — displaying ${data.date}.`
         loading.value = false
         return
       } catch (err: any) {
         if (err.message !== 'NOT_READY') {
-          error.value = 'Network error – please try again later.'
+          error.value = 'Network error - please try again later.'
           loading.value = false
           return
         }
       }
     }
 
-    /* ③ 连续 N 天无数据 */
     error.value = 'NASA has not published a new APOD in the last few days.'
     loading.value = false
   }
