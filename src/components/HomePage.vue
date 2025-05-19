@@ -23,12 +23,17 @@
       <h2 class="text-xl font-semibold">{{ apod.title }}</h2>
       <p v-if="apod.copyright" class="text-sm text-gray-400 italic mb-2">© {{ apod.copyright }}</p>
 
-      <img v-if="apod.media_type === 'image'" :src="hoverHd && apod.hdurl ? apod.hdurl : apod.url"
-           :alt="apod.title"
-           @mouseenter="apod.hdurl && (hoverHd = true)"
-           @mouseleave="hoverHd = false"
-           @click="openHd"
-           class="mx-auto rounded shadow max-w-md mt-4 cursor-zoom-in transition hover:scale-105 hover:brightness-110" />
+      <img
+        v-if="apod.media_type === 'image'"
+        ref="mediaEl"
+        :src="hoverHd && apod.hdurl ? apod.hdurl : apod.url"
+        :alt="apod.title"
+        @mouseenter="apod.hdurl && (hoverHd = true)"
+        @mouseleave="hoverHd = false"
+        @click="openHd"
+        @load="scrollToMediaCenter"
+        class="mx-auto rounded shadow max-w-md mt-4 cursor-zoom-in transition hover:scale-105 hover:brightness-110"
+      />
 
       <template v-else-if="isYoutube(apod.url)">
         <div v-if="apod.thumbnail_url && !showVideo" class="relative inline-block mt-4">
@@ -40,14 +45,24 @@
             ▶
           </button>
         </div>
-        <iframe v-else :src="getEmbeddableUrl(apod.url)"
-                class="mx-auto rounded shadow max-w-md aspect-video mt-4"
-                allowfullscreen />
+        <iframe
+          v-else
+          ref="mediaEl"
+          :src="getEmbeddableUrl(apod.url!)"
+          @load="scrollToMediaCenter"
+          class="mx-auto rounded shadow max-w-md aspect-video mt-4"
+          allowfullscreen
+        />
       </template>
 
-      <video v-else-if="apod.media_type === 'video' && apod.url?.endsWith('.mp4')"
-             :src="apod.url" controls
-             class="mx-auto rounded shadow max-w-md aspect-video mt-4" />
+      <video
+        v-else-if="apod.media_type === 'video' && apod.url?.endsWith('.mp4')"
+        ref="mediaEl"
+        :src="apod.url"
+        controls
+        @loadedmetadata="scrollToMediaCenter"
+        class="mx-auto rounded shadow max-w-md aspect-video mt-4"
+      />
 
       <div v-else class="mt-4">
         <p class="text-sm text-gray-500 italic mb-2">This content cannot be embedded directly.</p>
@@ -77,15 +92,19 @@ const {
 
 const showVideo = ref(false)
 const hoverHd = ref(false)
+const mediaEl = ref<HTMLElement | null>(null)
+const shouldScroll = ref(false)
 
 function onPrev() {
   prevDay()
   showVideo.value = false
+  shouldScroll.value = true
 }
 
 function onNext() {
   nextDay()
   showVideo.value = false
+  shouldScroll.value = true
 }
 
 function openHd() {
@@ -126,8 +145,20 @@ function getEmbeddableUrl(url: string): string {
   return url
 }
 
+// 自动滚动逻辑
+function scrollToMediaCenter() {
+  if (!shouldScroll.value) return
+  const el = mediaEl.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const scrollY = window.scrollY + rect.top + rect.height / 2 - window.innerHeight / 2
+  window.scrollTo({ top: scrollY, behavior: 'smooth' })
+  shouldScroll.value = false
+}
+
 watch(apod, () => {
   showVideo.value = false
+  shouldScroll.value = true
 })
 </script>
 
