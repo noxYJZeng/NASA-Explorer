@@ -26,8 +26,8 @@
       Content is shown according to local time
     </p>
 
-    <div class="mt-6 mb-6 w-full flex flex-col items-center gap-3 sm:relative sm:h-10">
-      <div class="flex items-center gap-4 sm:absolute sm:left-1/2 sm:-translate-x-1/2">
+    <div class="mt-6 mb-6 w-full flex flex-col items-center gap-2">
+      <div class="flex items-center gap-4 justify-center">
         <button @click="changeSelectedDay(-1)" class="text-2xl px-3">←</button>
         <span class="text-base sm:text-lg font-semibold whitespace-nowrap">
           {{ formatDateDisplay(selectedDate) }}
@@ -37,9 +37,8 @@
 
       <button
         @click="goToToday"
-        class="text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300
-              dark:bg-gray-700 dark:hover:bg-gray-600 transition whitespace-nowrap
-              sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2"
+        class="text-sm mt-2 px-3 py-1 rounded bg-gray-200 hover:bg-gray-300
+              dark:bg-gray-700 dark:hover:bg-gray-600 transition whitespace-nowrap"
       >
         📅 Today
       </button>
@@ -96,7 +95,6 @@
 import { ref, watch, nextTick, onMounted } from 'vue'
 import { useAsteroidStats } from '@/composables/useAsteroidStats'
 
-// 日期工具函数
 function getTodayDateString(): string {
   const today = new Date()
   return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
@@ -112,7 +110,6 @@ function formatDateDisplay(dateStr: string): string {
   })
 }
 
-// 响应式状态
 const startDate = ref(getTodayDateString())
 const {
   chartRef,
@@ -131,19 +128,16 @@ async function load() {
   selectedDate.value = startDate.value
 }
 
-// ✅ 页面加载后首次调用（加载今天）
 onMounted(async () => {
   await load()
 })
 
-// ✅ 监听日期变动 → 自动加载数据（替代“Load”按钮）
 watch(startDate, async (newDate, oldDate) => {
   if (newDate !== oldDate) {
     await load()
   }
 })
 
-// ✅ 图表渲染完挂载后加载（冗余但安全）
 watch(chartRef, async (el) => {
   if (el) {
     await nextTick()
@@ -151,6 +145,5 @@ watch(chartRef, async (el) => {
   }
 })
 
-// 导出工具函数供模板使用
 defineExpose({ formatDateDisplay, selectedDate, changeSelectedDay, goToToday, displayList, chartRef, drawingInProgress })
 </script>

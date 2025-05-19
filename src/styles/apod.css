@@ -1,0 +1,42 @@
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 9999px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+  }
+  
+  .nav-btn:hover {
+    background-color: #2563eb;
+  }
+  
+  .nav-btn:disabled {
+    opacity: 0.3;
+  }
+  
+  .left-8 {
+    left: 2rem;
+  }
+  
+  .right-8 {
+    right: 2rem;
+  }
+  
+  @media (max-width: 450px) {
+    .left-8 {
+      left: 1rem;
+    }
+  
+    .right-8 {
+      right: 1rem;
+    }
+  }
+  

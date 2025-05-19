@@ -26,13 +26,13 @@
         menuOpen ? 'flex' : 'hidden sm:flex'
       ]"
     >
-      <RouterLink to="/apod" class="nav-link" :class="{ active: $route.path === '/apod' }">APOD</RouterLink>
-      <RouterLink to="/asteroids" class="nav-link" :class="{ active: $route.path === '/asteroids' }">Asteroids</RouterLink>
-      <RouterLink to="/iss" class="nav-link" :class="{ active: $route.path === '/iss' }">ISS&nbsp;Tracker</RouterLink>
+      <RouterLink to="/apod" class="nav-link text-base" :class="{ active: $route.path === '/apod' }">APOD</RouterLink>
+      <RouterLink to="/asteroids" class="nav-link text-base" :class="{ active: $route.path === '/asteroids' }">Asteroids</RouterLink>
+      <RouterLink to="/iss" class="nav-link text-base" :class="{ active: $route.path === '/iss' }">ISS&nbsp;Tracker</RouterLink>
 
       <button
         @click="$emit('toggle-dark')"
-        class="ml-0 sm:ml-4 px-3 py-1 text-sm border rounded
+        class="ml-0 sm:ml-4 px-3 py-1 text-base border rounded
                bg-gray-100 text-black border-gray-400
                dark:bg-gray-800 dark:text-white dark:border-gray-600
                hover:bg-gray-200 dark:hover:bg-gray-700 transition"
@@ -46,8 +46,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-defineProps<{ isDark: boolean }>()
 import logo from '@/assets/logo.png'
+
+defineProps<{ isDark: boolean }>()
 
 const $route = useRoute()
 const router = useRouter()
@@ -61,11 +62,4 @@ function redirectToHomeWithLoader() {
 }
 </script>
 
-<style scoped>
-.nav-link {
-  @apply text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition text-sm;
-}
-.nav-link.active {
-  @apply text-blue-600 dark:text-blue-400 font-semibold;
-}
-</style>
+<style src="@/styles/navbar.css"></style>

@@ -5,19 +5,18 @@
     <div class="flex flex-wrap justify-center gap-4">
       <button
         @click="viewMode = '2d'"
-        :class="viewMode === '2d' ? activeBtn : inactiveBtn"
+        :class="viewMode === '2d' ? 'btn-active' : 'btn-inactive'"
       >
-        🗺 2D Map View
+        🗘 2D Map View
       </button>
       <button
         @click="viewMode = '3d'"
-        :class="viewMode === '3d' ? activeBtn : inactiveBtn"
+        :class="viewMode === '3d' ? 'btn-active' : 'btn-inactive'"
       >
         🌍 3D Globe View
       </button>
     </div>
 
-    <!-- 经纬度显示 -->
     <div class="text-sm text-gray-600 dark:text-gray-300 text-center">
       <p v-if="loading">Loading ISS position...</p>
       <p v-else-if="error" class="text-red-500">Error: {{ error }}</p>
@@ -54,19 +53,6 @@ import IssMap3D from './iss/IssMap3D.vue'
 
 const viewMode = ref<'2d' | '3d'>('3d')
 const { latitude, longitude, loading, error } = useIssTracker()
-
-const activeBtn =
-  'px-4 py-1 rounded bg-blue-600 text-white font-semibold shadow transition'
-const inactiveBtn =
-  'px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition'
 </script>
 
-<style scoped>
-html,
-body,
-#app {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-</style>
+<style src="@/styles/iss.css"></style>

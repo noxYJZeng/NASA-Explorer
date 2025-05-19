@@ -15,7 +15,6 @@
       </svg>
     </button>
 
-    <!-- 标题 -->
     <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
       Astronomy Picture of the Day
     </h1>
@@ -41,7 +40,6 @@
       Get Today's Image
     </button>
 
-    <!-- 状态显示 -->
     <div v-if="notice" class="mt-4 text-yellow-600 dark:text-yellow-400 text-sm italic">
       {{ notice }}
     </div>
@@ -107,7 +105,7 @@
         </template>
       </template>
 
-      <!-- fallback for media_type === 'other' or url missing -->
+      <!-- fallback -->
       <template v-else>
         <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 italic">
           NASA did not provide a direct media URL. Try opening the fallback page:
@@ -128,6 +126,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useHomePage } from '../composables/useHomePage'
+import { isYoutube, getEmbeddableUrl } from '../utils/mediaUtils'
 
 const {
   today, selectedDate, apod,
@@ -192,39 +191,10 @@ function getDefaultApodHtmlUrl(date: string): string {
   return `https://apod.nasa.gov/apod/ap${String(year).slice(2)}${month}${day}.html`
 }
 
-function isYoutube(url: string) {
-  return url?.includes('youtube.com') || url?.includes('youtu.be')
-}
-
-function getEmbeddableUrl(url: string) {
-  if (url.includes('youtube.com/watch')) {
-    const videoId = url.split('v=')[1]?.split('&')[0]
-    return `https://www.youtube.com/embed/${videoId}`
-  } else if (url.includes('youtu.be')) {
-    const videoId = url.split('youtu.be/')[1]
-    return `https://www.youtube.com/embed/${videoId}`
-  }
-  return url
-}
-
 watch(apod, (val) => {
   if (val) console.log('[DEBUG] APOD:', val)
 })
 </script>
 
-<style scoped>
-.nav-btn {
-  @apply absolute top-1/2 -translate-y-1/2
-          w-10 h-10 flex items-center justify-center
-          bg-blue-500 dark:bg-blue-600 rounded-full shadow
-          hover:bg-blue-600 dark:hover:bg-blue-700
-          text-white transition
-          disabled:opacity-30;
-}
-.left-8  { left: 2rem; }
-.right-8 { right: 2rem; }
-@media (max-width: 450px) {
-  .left-8  { left: 1rem; }
-  .right-8 { right: 1rem; }
-}
-</style>
+<!-- 🔗 引入外部样式 -->
+<style src="../styles/apod.css"></style>
