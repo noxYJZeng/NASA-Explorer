@@ -35,7 +35,7 @@
 | Visualization  | Chart.js for asteroid statistics                |
 | Mapping        | Leaflet.js (2D), CesiumJS (3D globe visualization) |
 | API Sources    | NASA Open APIs (APOD, NEO, ISS)                 |
-| Deployment     | Vercel or Netlify                               |
+| Deployment     | Netlify                               |
 
 ##  Live Demo
 
