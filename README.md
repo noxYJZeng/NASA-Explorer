@@ -37,6 +37,6 @@
 | API Sources    | NASA Open APIs (APOD, NEO, ISS)                 |
 | Deployment     | Vercel or Netlify                               |
 
-## 🌐 Live Demo
+##  Live Demo
 
 🔗 [Try it online](https://nasa-explorer-z.netlify.app/apod) 
