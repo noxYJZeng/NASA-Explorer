@@ -1,16 +1,42 @@
 <template>
   <div class="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow relative text-center">
+
+    <div
+      v-if="showAnnouncement"
+      class="relative mb-4 px-4 py-2 rounded-md text-sm font-semibold text-gray-800 bg-yellow-100 border border-yellow-300
+             dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-600 animate-fadeIn"
+    >
+      <span>{{ announcement }}</span>
+      <button
+        @click="closeAnnouncement"
+        class="absolute top-1 right-2 text-lg font-bold text-gray-600 dark:text-gray-300 hover:text-black"
+        aria-label="Close announcement"
+      >
+        ×
+      </button>
+    </div>
+
     <button class="nav-btn left-8" :disabled="loading" @click="onPrev">←</button>
     <button class="nav-btn right-8" :disabled="loading || selectedDate === today" @click="onNext">→</button>
 
     <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400">Astronomy Picture of the Day</h1>
 
     <div class="mt-4">
-      <input type="date" v-model="selectedDate" :max="today" @change="fetchApod"
-             class="rounded border px-3 py-1 dark:bg-gray-700 dark:text-white" />
-      <button class="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-              @click="goToToday">Today</button>
+      <input
+        type="date"
+        v-model="selectedDate"
+        :max="today"
+        @change="fetchApod"
+        class="rounded border px-3 py-1 dark:bg-gray-700 dark:text-white"
+      />
+      <button
+        class="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+        @click="goToToday"
+      >
+        Today
+      </button>
     </div>
+
     <p class="mt-2 text-xs text-gray-400 dark:text-gray-500 italic">
       Content is shown according to local time
     </p>
@@ -37,11 +63,11 @@
 
       <template v-else-if="isYoutube(apod.url)">
         <div v-if="apod.thumbnail_url && !showVideo" class="relative inline-block mt-4">
-          <img :src="apod.thumbnail_url" :alt="apod.title"
-               class="mx-auto rounded shadow max-w-md" />
-          <button @click="showVideo = true"
-                  class="absolute inset-0 flex items-center justify-center
-                         text-white text-5xl bg-black/40 hover:bg-black/60 rounded">
+          <img :src="apod.thumbnail_url" :alt="apod.title" class="mx-auto rounded shadow max-w-md" />
+          <button
+            @click="showVideo = true"
+            class="absolute inset-0 flex items-center justify-center text-white text-5xl bg-black/40 hover:bg-black/60 rounded"
+          >
             ▶
           </button>
         </div>
@@ -66,8 +92,10 @@
 
       <div v-else class="mt-4">
         <p class="text-sm text-gray-500 italic mb-2">This content cannot be embedded directly.</p>
-        <button @click="openFallbackLink"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+        <button
+          @click="openFallbackLink"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
           ▶ Open in new tab
         </button>
       </div>
@@ -84,11 +112,26 @@ import { ref, watch } from 'vue'
 import { useHomePage } from '../composables/useHomePage'
 
 const {
-  today, selectedDate, apod,
-  loading, error, notice,
-  fetchApod, goToToday,
-  prevDay, nextDay,
+  today,
+  selectedDate,
+  apod,
+  loading,
+  error,
+  notice,
+  fetchApod,
+  goToToday,
+  prevDay,
+  nextDay,
 } = useHomePage()
+
+const ANNOUNCEMENT_KEY = 'nasa_announcement_closed'
+const announcement = '🚨 Notice: NASA may not update APOD due to the U.S. government shutdown. Some dates may show fallback images.'
+const showAnnouncement = ref(!localStorage.getItem(ANNOUNCEMENT_KEY))
+
+function closeAnnouncement() {
+  showAnnouncement.value = false
+  localStorage.setItem(ANNOUNCEMENT_KEY, 'true')
+}
 
 const showVideo = ref(false)
 const hoverHd = ref(false)
@@ -108,22 +151,14 @@ function onNext() {
 }
 
 function openHd() {
-  if (apod.value?.hdurl) {
-    window.open(apod.value.hdurl, '_blank')
-  }
+  if (apod.value?.hdurl) window.open(apod.value.hdurl, '_blank')
 }
 
 function openFallbackLink() {
   let url = apod.value?.url
-  if (!url && apod.value?.date) {
-    url = getFallbackUrl(apod.value.date)
-  }
-
-  if (url) {
-    window.open(url, '_blank')
-  } else {
-    alert('NASA did not provide a valid content link.')
-  }
+  if (!url && apod.value?.date) url = getFallbackUrl(apod.value.date)
+  if (url) window.open(url, '_blank')
+  else alert('NASA did not provide a valid content link.')
 }
 
 function getFallbackUrl(date: string): string {
@@ -145,7 +180,6 @@ function getEmbeddableUrl(url: string): string {
   return url
 }
 
-// 自动滚动逻辑
 function scrollToMediaCenter() {
   if (!shouldScroll.value) return
   const el = mediaEl.value
@@ -164,8 +198,16 @@ watch(apod, () => {
 
 <style scoped>
 .nav-btn {
-  @apply absolute top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700;
+  @apply absolute top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 disabled:opacity-50;
 }
 .left-8 { left: 1rem; }
 .right-8 { right: 1rem; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-in-out;
+}
 </style>

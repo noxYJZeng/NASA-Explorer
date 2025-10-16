@@ -5,6 +5,7 @@ const API_KEY           = 'oYN9Rk9B6Bm2Kp3sfgr1cnZUH8mbxeHvIrpoKV1U'
 const MAX_ROLLBACK_DAYS = 5
 const NASA_FAIL_KEY     = 'nasa_apod_last_fail'
 const FAIL_CACHE_HOURS  = 3
+const FETCH_TIMEOUT_MS  = 5000
 
 function localISODate(d: Date = new Date()) {
   const y  = d.getFullYear()
@@ -52,19 +53,28 @@ export function useHomePage() {
   }
 
   async function fetchApodByDate(dateStr: string): Promise<ApodData> {
-    const res = await fetch(
-      `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${dateStr}`
-    )
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
-    if (!res.ok) {
-      if (res.status === 504 || res.status === 502 || res.status === 500) {
-        throw new Error('NASA_DOWN')
+    try {
+      const res = await fetch(
+        `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${dateStr}`,
+        { signal: controller.signal }
+      )
+      clearTimeout(timeout)
+
+      if (!res.ok) {
+        if (res.status === 504 || res.status === 502 || res.status === 500) throw new Error('NASA_DOWN')
+        if (res.status === 404 || res.status === 400) throw new Error('NOT_READY')
+        throw new Error('NETWORK')
       }
-      if (res.status === 404 || res.status === 400) throw new Error('NOT_READY')
-      throw new Error('NETWORK')
-    }
 
-    return res.json() as Promise<ApodData>
+      return res.json() as Promise<ApodData>
+    } catch (err: any) {
+      clearTimeout(timeout)
+      if (err.name === 'AbortError') throw new Error('TIMEOUT')
+      throw err
+    }
   }
 
   function showFallback(reason: string) {
@@ -72,7 +82,7 @@ export function useHomePage() {
     apod.value = {
       title: 'NASA APOD Temporarily Unavailable',
       explanation:
-        "This is a fallback image because NASA's API is temporarily unavailable. Please check back later.",
+        "This is a fallback image because NASA's API is temporarily unavailable or timed out. Please check back later.",
       url: fallbackImage,
       date: today,
       media_type: 'image',
@@ -98,9 +108,9 @@ export function useHomePage() {
       loading.value = false
       return
     } catch (err: any) {
-      if (err.message === 'NASA_DOWN') {
+      if (['NASA_DOWN', 'TIMEOUT'].includes(err.message)) {
         markNasaFail()
-        showFallback('🚧 NASA APOD service is currently unavailable (504). Showing local fallback image.')
+        showFallback('🚧 NASA APOD service timeout or unavailable — showing local fallback image.')
         return
       }
       if (err.message !== 'NOT_READY') {
@@ -110,7 +120,6 @@ export function useHomePage() {
       }
     }
 
-    
     let date = strToLocalDate(selectedDate.value)
     for (let i = 1; i <= MAX_ROLLBACK_DAYS; i++) {
       date.setDate(date.getDate() - 1)
@@ -119,8 +128,7 @@ export function useHomePage() {
         const data = await fetchApodByDate(dateStr)
         apod.value = data
         selectedDate.value = data.date
-        notice.value =
-          `NASA hasn't published new content — displaying ${data.date}.`
+        notice.value = `NASA hasn't published new content — displaying ${data.date}.`
         loading.value = false
         return
       } catch (err: any) {
@@ -171,3 +179,4 @@ export function useHomePage() {
     nextDay,
   }
 }
+
