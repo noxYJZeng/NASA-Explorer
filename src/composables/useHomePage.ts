@@ -40,7 +40,7 @@ export function useHomePage() {
   const notice  = ref('')
 
   function nasaRecentlyFailed(): boolean {
-    const lastFail = localStorage.getItem(NASA_FAIL_KEY)
+    const lastFail = sessionStorage.getItem(NASA_FAIL_KEY)
     if (!lastFail) return false
     const lastTime = new Date(parseInt(lastFail))
     const now = new Date()
@@ -49,7 +49,7 @@ export function useHomePage() {
   }
 
   function markNasaFail() {
-    localStorage.setItem(NASA_FAIL_KEY, Date.now().toString())
+    sessionStorage.setItem(NASA_FAIL_KEY, Date.now().toString())
   }
 
   async function fetchApodByDate(dateStr: string): Promise<ApodData> {
@@ -64,8 +64,8 @@ export function useHomePage() {
       clearTimeout(timeout)
 
       if (!res.ok) {
-        if (res.status === 504 || res.status === 502 || res.status === 500) throw new Error('NASA_DOWN')
-        if (res.status === 404 || res.status === 400) throw new Error('NOT_READY')
+        if ([504, 502, 500].includes(res.status)) throw new Error('NASA_DOWN')
+        if ([404, 400].includes(res.status)) throw new Error('NOT_READY')
         throw new Error('NETWORK')
       }
 
@@ -179,4 +179,3 @@ export function useHomePage() {
     nextDay,
   }
 }
-
