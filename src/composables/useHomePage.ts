@@ -1,14 +1,18 @@
 import { ref, onMounted } from 'vue'
+import fallbackImage from '../assets/apod_fallback.jpg'
 
-const API_KEY            = 'oYN9Rk9B6Bm2Kp3sfgr1cnZUH8mbxeHvIrpoKV1U'
-const MAX_ROLLBACK_DAYS  = 5
+const API_KEY           = 'oYN9Rk9B6Bm2Kp3sfgr1cnZUH8mbxeHvIrpoKV1U'
+const MAX_ROLLBACK_DAYS = 5
+const NASA_FAIL_KEY     = 'nasa_apod_last_fail'
+const FAIL_CACHE_HOURS  = 3
 
 function localISODate(d: Date = new Date()) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const y  = d.getFullYear()
+  const m  = String(d.getMonth() + 1).padStart(2, '0')
   const dd = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${dd}`
 }
+
 function strToLocalDate(ymd: string) {
   const [y, m, d] = ymd.split('-').map(Number)
   return new Date(y, m - 1, d)
@@ -25,25 +29,55 @@ export type ApodData = {
   copyright?: string
 }
 
-
 export function useHomePage() {
-  const today         = localISODate()
-  const selectedDate  = ref(today)
+  const today        = localISODate()
+  const selectedDate = ref(today)
 
-  const apod          = ref<ApodData | null>(null)
-  const loading       = ref(false)
-  const error         = ref('')
-  const notice        = ref('')
+  const apod    = ref<ApodData | null>(null)
+  const loading = ref(false)
+  const error   = ref('')
+  const notice  = ref('')
+
+  function nasaRecentlyFailed(): boolean {
+    const lastFail = localStorage.getItem(NASA_FAIL_KEY)
+    if (!lastFail) return false
+    const lastTime = new Date(parseInt(lastFail))
+    const now = new Date()
+    const diffHours = (now.getTime() - lastTime.getTime()) / (1000 * 60 * 60)
+    return diffHours < FAIL_CACHE_HOURS
+  }
+
+  function markNasaFail() {
+    localStorage.setItem(NASA_FAIL_KEY, Date.now().toString())
+  }
 
   async function fetchApodByDate(dateStr: string): Promise<ApodData> {
     const res = await fetch(
       `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${dateStr}`
     )
+
     if (!res.ok) {
+      if (res.status === 504 || res.status === 502 || res.status === 500) {
+        throw new Error('NASA_DOWN')
+      }
       if (res.status === 404 || res.status === 400) throw new Error('NOT_READY')
       throw new Error('NETWORK')
     }
+
     return res.json() as Promise<ApodData>
+  }
+
+  function showFallback(reason: string) {
+    notice.value = reason
+    apod.value = {
+      title: 'NASA APOD Temporarily Unavailable',
+      explanation:
+        "This is a fallback image because NASA's API is temporarily unavailable. Please check back later.",
+      url: fallbackImage,
+      date: today,
+      media_type: 'image',
+    }
+    loading.value = false
   }
 
   async function fetchApod() {
@@ -52,6 +86,11 @@ export function useHomePage() {
     notice.value  = ''
     apod.value    = null
 
+    if (nasaRecentlyFailed()) {
+      showFallback('🚧 NASA API recently failed — showing cached fallback image.')
+      return
+    }
+
     try {
       const data = await fetchApodByDate(selectedDate.value)
       apod.value = data
@@ -59,6 +98,11 @@ export function useHomePage() {
       loading.value = false
       return
     } catch (err: any) {
+      if (err.message === 'NASA_DOWN') {
+        markNasaFail()
+        showFallback('🚧 NASA APOD service is currently unavailable (504). Showing local fallback image.')
+        return
+      }
       if (err.message !== 'NOT_READY') {
         error.value = 'Network error – please try again later.'
         loading.value = false
@@ -66,6 +110,7 @@ export function useHomePage() {
       }
     }
 
+    
     let date = strToLocalDate(selectedDate.value)
     for (let i = 1; i <= MAX_ROLLBACK_DAYS; i++) {
       date.setDate(date.getDate() - 1)
@@ -75,7 +120,7 @@ export function useHomePage() {
         apod.value = data
         selectedDate.value = data.date
         notice.value =
-          `NASA doesn't publish new content — displaying ${data.date}.`
+          `NASA hasn't published new content — displaying ${data.date}.`
         loading.value = false
         return
       } catch (err: any) {
@@ -87,8 +132,7 @@ export function useHomePage() {
       }
     }
 
-    error.value = 'NASA has not published a new APOD in the last few days.'
-    loading.value = false
+    showFallback('NASA has not published a new APOD in the last few days.')
   }
 
   function goToToday() {
@@ -96,24 +140,24 @@ export function useHomePage() {
     fetchApod()
   }
 
-  onMounted(fetchApod)
   function shiftDate(offset: number) {
     const newD = strToLocalDate(selectedDate.value)
     newD.setDate(newD.getDate() + offset)
-  
     if (newD > new Date()) return
     selectedDate.value = localISODate(newD)
     fetchApod()
   }
-  
+
   function prevDay() {
     shiftDate(-1)
   }
-  
+
   function nextDay() {
     shiftDate(+1)
   }
-  
+
+  onMounted(fetchApod)
+
   return {
     today,
     selectedDate,
@@ -123,7 +167,7 @@ export function useHomePage() {
     notice,
     fetchApod,
     goToToday,
-    prevDay, 
+    prevDay,
     nextDay,
   }
 }
